@@ -11,7 +11,12 @@ Built with Node.js, Express, MySQL and XAMPP.
 - Submission history and progress stored in MySQL
 - Leaderboard
 - Kali Linux integration: students download each lab's evidence directly onto their **own** Kali VM and analyse it there, so no dedicated lab server is needed
+## Screenshots
 
+![Screenshot 1](screenshots/Screenshot%202026-10-27%20234015.png)
+![Screenshot 2](screenshots/Screenshot%202026-10-27%20234114.png)
+![Screenshot 3](screenshots/Screenshot%202026-10-27%20234135.png)
+![Screenshot 4](screenshots/Screenshot%202026-10-27%20234147.png)
 ## Included labs
 
 | Lab | Category | Difficulty |
