@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CyberAcademy | Blue Team Training</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <span class="brand">Cyber<span>Academy</span></span>
+      <p class="tagline">Hands-on blue team training. Defend, detect, respond.</p>
+
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" id="tab-login">Log in</div>
+          <div class="tab" id="tab-register">Sign up</div>
+        </div>
+
+        <form id="login-form">
+          <label for="l-user">Username or email</label>
+          <input type="text" id="l-user" autocomplete="username" required>
+          <label for="l-pass">Password</label>
+          <input type="password" id="l-pass" autocomplete="current-password" required>
+          <button class="btn full" type="submit">Log in</button>
+        </form>
+
+        <form id="register-form" style="display:none">
+          <label for="r-user">Username</label>
+          <input type="text" id="r-user" autocomplete="username" required>
+          <label for="r-email">Email</label>
+          <input type="email" id="r-email" autocomplete="email" required>
+          <label for="r-pass">Password (min 8 characters)</label>
+          <input type="password" id="r-pass" autocomplete="new-password" required>
+          <button class="btn full" type="submit">Create account</button>
+        </form>
+
+        <div class="msg" id="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    const msg = document.getElementById('msg');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+
+    function setTab(login) {
+      loginForm.style.display = login ? 'block' : 'none';
+      registerForm.style.display = login ? 'none' : 'block';
+      tabLogin.classList.toggle('active', login);
+      tabRegister.classList.toggle('active', !login);
+      msg.className = 'msg';
+    }
+    tabLogin.onclick = () => setTab(true);
+    tabRegister.onclick = () => setTab(false);
+
+    // Already logged in? Go straight to the dashboard.
+    fetch('/api/me', { credentials: 'same-origin' }).then((r) => { if (r.ok) location.href = 'dashboard.html'; });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/login', {
+          method: 'POST',
+          body: { username: document.getElementById('l-user').value, password: document.getElementById('l-pass').value }
+        });
+        location.href = 'dashboard.html';
+      } catch (err) { showMsg(msg, err.message, false); }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await api('/api/register', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('r-user').value,
+            email: document.getElementById('r-email').value,
+            password: document.getElementById('r-pass').value
+          }
+        });
+        location.href = 'dashboard.html';
+      } catch (err) { showMsg(msg, err.message, false); }
+    });
+  </script>
+</body>
+</html>

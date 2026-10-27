@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab | CyberAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <div class="container">
+    <a href="labs.html" class="muted">&larr; All labs</a>
+    <h1 id="title" style="margin-top:10px">Loading...</h1>
+    <div id="badges" style="margin-bottom:18px"></div>
+
+    <div class="lab-layout">
+      <div class="card instructions" id="instructions"></div>
+
+      <div>
+        <div class="card side-card">
+          <h3>1. Get the evidence</h3>
+          <p class="muted" style="margin:0 0 8px">Run this on your Kali VM. The link is valid for 4 hours.</p>
+          <button class="btn ghost" id="token-btn">Generate download command</button>
+          <pre class="cmd" id="cmd" style="display:none"></pre>
+        </div>
+
+        <div class="card side-card" style="margin-top:16px">
+          <h3>2. Submit the flag</h3>
+          <form id="flag-form">
+            <input type="text" id="flag" placeholder="CA{...}" autocomplete="off" required>
+            <button class="btn full" type="submit">Submit</button>
+          </form>
+          <div class="msg" id="msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    renderNav('labs.html');
+
+    const slug = new URLSearchParams(location.search).get('slug');
+    let lab = null;
+
+    function setBadges() {
+      document.getElementById('badges').innerHTML =
+        `<span class="badge ${lab.difficulty}">${lab.difficulty}</span>
+         <span class="badge">${esc(lab.category)}</span>
+         <span class="badge">${lab.points} points</span>
+         ${lab.solved ? '<span class="badge solved">Solved</span>' : ''}`;
+    }
+
+    (async () => {
+      if (!slug) { location.href = 'labs.html'; return; }
+      try {
+        lab = await api('/api/labs/' + encodeURIComponent(slug));
+      } catch (e) {
+        document.getElementById('title').textContent = 'Lab not found';
+        return;
+      }
+      document.title = lab.title + ' | CyberAcademy';
+      document.getElementById('title').textContent = lab.title;
+      document.getElementById('instructions').innerHTML = renderMarkdown(lab.instructions);
+      setBadges();
+    })();
+
+    document.getElementById('token-btn').addEventListener('click', async () => {
+      const { token } = await api('/api/lab-token');
+      const cmd = document.getElementById('cmd');
+      cmd.style.display = 'block';
+      cmd.textContent = `curl -o ${lab.artifact} "${lab.artifactUrl}?token=${token}"`;
+    });
+
+    document.getElementById('flag-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('msg');
+      try {
+        const r = await api(`/api/labs/${encodeURIComponent(slug)}/submit`, {
+          method: 'POST',
+          body: { flag: document.getElementById('flag').value }
+        });
+        showMsg(msg, r.message, r.correct);
+        if (r.correct) { lab.solved = true; setBadges(); }
+      } catch (err) { showMsg(msg, err.message, false); }
+    });
+  </script>
+</body>
+</html>

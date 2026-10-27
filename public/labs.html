@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Labs | CyberAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <div class="container">
+    <h1>Labs</h1>
+    <p class="sub">Practical exercises. Download the evidence to your Kali VM and investigate.</p>
+    <div class="grid labs" id="labs"></div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    renderNav('labs.html');
+
+    (async () => {
+      const labs = await api('/api/labs');
+      document.getElementById('labs').innerHTML = labs.map((l) => `
+        <a class="card lab-card" href="lab.html?slug=${encodeURIComponent(l.slug)}">
+          <div>
+            <span class="badge ${l.difficulty}">${l.difficulty}</span>
+            <span class="badge">${esc(l.category)}</span>
+            ${l.solved ? '<span class="badge solved">Solved</span>' : ''}
+          </div>
+          <h3>${esc(l.title)}</h3>
+          <p>${esc(l.description)}</p>
+          <div class="lab-meta"><span>${l.points} points</span><span>Open lab &rarr;</span></div>
+        </a>`).join('');
+    })();
+  </script>
+</body>
+</html>

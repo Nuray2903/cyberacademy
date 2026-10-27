@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard | CyberAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <div class="container">
+    <h1 id="welcome">Dashboard</h1>
+    <p class="sub">Your progress across the blue team curriculum.</p>
+
+    <div class="grid stats" id="stats"></div>
+
+    <h2>Progress by category</h2>
+    <div class="card" id="categories"></div>
+
+    <h2>Recent activity</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Lab</th><th>Result</th><th>When</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    renderNav('dashboard.html');
+
+    (async () => {
+      const d = await api('/api/me');
+      document.getElementById('welcome').textContent = `Welcome back, ${d.user.username}`;
+
+      const pct = d.totalLabs ? Math.round((d.solvedLabs / d.totalLabs) * 100) : 0;
+      const stat = (label, value) => `<div class="card stat"><div class="label">${label}</div><div class="value">${value}</div></div>`;
+      document.getElementById('stats').innerHTML =
+        stat('Points', d.user.points) +
+        stat('Rank', '#' + d.rank) +
+        stat('Labs solved', `${d.solvedLabs} / ${d.totalLabs}`) +
+        stat('Completion', pct + '%');
+
+      document.getElementById('categories').innerHTML = d.byCategory.length
+        ? d.byCategory.map((c) => {
+            const solved = Number(c.solved);
+            const p = c.total ? Math.round((solved / c.total) * 100) : 0;
+            return `<div class="cat-row">
+              <div class="top"><span>${esc(c.category)}</span><span class="muted">${solved} / ${c.total}</span></div>
+              <div class="progress"><div style="width:${p}%"></div></div>
+            </div>`;
+          }).join('')
+        : '<p class="muted">No labs available yet.</p>';
+
+      document.getElementById('recent').innerHTML = d.recent.length
+        ? d.recent.map((r) => `<tr>
+            <td><a href="lab.html?slug=${encodeURIComponent(r.slug)}">${esc(r.title)}</a></td>
+            <td>${r.is_correct ? '<span class="badge solved">Correct</span>' : '<span class="badge">Incorrect</span>'}</td>
+            <td class="muted">${new Date(r.submitted_at).toLocaleString()}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="3" class="muted">No submissions yet. Head to the Labs page to get started.</td></tr>';
+    })();
+  </script>
+</body>
+</html>

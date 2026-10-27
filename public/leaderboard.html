@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leaderboard | CyberAcademy</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="nav"></div>
+  <div class="container">
+    <h1>Leaderboard</h1>
+    <p class="sub">Top defenders on the platform.</p>
+    <div class="card">
+      <table>
+        <thead><tr><th>#</th><th>User</th><th>Points</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    renderNav('leaderboard.html');
+    (async () => {
+      const rows = await api('/api/leaderboard');
+      document.getElementById('rows').innerHTML = rows.length
+        ? rows.map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.username)}</td><td>${r.points}</td></tr>`).join('')
+        : '<tr><td colspan="3" class="muted">No users yet.</td></tr>';
+    })();
+  </script>
+</body>
+</html>
